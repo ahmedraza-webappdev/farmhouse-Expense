@@ -210,65 +210,58 @@
         <p>6 Persons Expense Sharing System</p>
     </header>
 
-    <!-- Expense Input Form -->
     <div class="card">
-        <h2>Naya Kharcha Add Karein</h2>
+        <h2>Add New Expense</h2>
         <form id="expenseForm">
             <div class="form-group">
-                <label for="memberName">Naam Select Karein</label>
+                <label for="memberName">Select Name</label>
                 <select id="memberName" required>
-                    <option value="" disabled selected>Kaun hai?</option>
-                    <!-- Yahan aap doston ke actual naam change kar sakte hain -->
-                    <option value="Dost 1">Dost 1</option>
-                    <option value="Dost 2">Dost 2</option>
-                    <option value="Dost 3">Dost 3</option>
-                    <option value="Dost 4">Dost 4</option>
-                    <option value="Dost 5">Dost 5</option>
-                    <option value="Dost 6">Dost 6</option>
+                    <option value="" disabled selected>Who paid?</option>
+                    <option value="KHANSAHAB">KHANSAHAB</option>
+                    <option value="Alishal">Alishal</option>
+                    <option value="Ahmed">Ahmed</option>
+                    <option value="Minnu">Minnu</option>
+                    <option value="Zayan">Zayan</option>
+                    <option value="Ayaan">Ayaan</option>
                 </select>
             </div>
             <div class="form-group">
-                <label for="itemDescription">Saman / Wajah</label>
-                <input type="text" id="itemDescription" placeholder="e.g., Petrol, Gosht, Cold drinks" required>
+                <label for="itemDescription">Item / Description</label>
+                <input type="text" id="itemDescription" placeholder="e.g., Petrol, Meat, Cold drinks" required>
             </div>
             <div class="form-group">
-                <label for="amountPaid">Paise (PKR)</label>
-                <input type="number" id="amountPaid" min="1" placeholder="Kitne paise kharch kiye?" required>
+                <label for="amountPaid">Amount (PKR)</label>
+                <input type="number" id="amountPaid" min="1" placeholder="How much did you spend?" required>
             </div>
-            <button type="submit" id="submitBtn">Save Karein</button>
+            <button type="submit" id="submitBtn">Save Expense</button>
         </form>
     </div>
 
-    <!-- Calculations Summary -->
     <div class="card">
-        <h2>Trip Ka Hisab-Kitab</h2>
-        <div id="loadingText" class="loading">Data load ho raha hai...</div>
+        <h2>Trip Summary</h2>
+        <div id="loadingText" class="loading">Loading data...</div>
         <div id="summaryContent" style="display: none;">
             <div class="summary-row">
-                <span>Total Kharcha:</span>
+                <span>Total Expense:</span>
                 <span id="totalExpense" class="status-amount">Rs. 0</span>
             </div>
             <div class="summary-row summary-total">
-                <span>Per Head Hissa (6 Log):</span>
+                <span>Per Head Share (6 People):</span>
                 <span id="perHeadExpense" class="status-amount">Rs. 0</span>
             </div>
         </div>
     </div>
 
-    <!-- Settlement Status -->
     <div class="card">
-        <h2>Net Settlement (Kisko Kitne Dene/Lene Hain)</h2>
+        <h2>Net Settlement (Who owes whom)</h2>
         <div id="memberStatusList">
-            <!-- Dynamic data will load here -->
-        </div>
+            </div>
     </div>
 
-    <!-- Recent Activity Log -->
     <div class="card">
-        <h2>Saman ki Details (Logs)</h2>
+        <h2>Expense Logs (Details)</h2>
         <div class="logs-list" id="logsList">
-            <!-- Items logs -->
-        </div>
+            </div>
     </div>
 </div>
 
@@ -276,7 +269,7 @@
     // ⚠️ YAHA APNA GOOGLE WEB APP URL PASTE KAREIN
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwx613xaYOSEjfkSMEAaD51IHyl1nBsqd-hMUP5Wy6A-t0ze8syB-3jOFcR3yClvuGWag/exec";
 
-    // 6 Doston ke naam (Aap yahan change kar sakte hain)
+    // 6 Doston ke naam (Symmetry ke liye bilkul uppercase/lowercase same hain)
     const members = ["KHANSAHAB", "Alishal", "Ahmed", "Minnu", "Zayan", "Ayaan"];
     
     let expensesData = [];
@@ -292,7 +285,7 @@
             calculateHisab();
         } catch (error) {
             console.error("Error fetching data:", error);
-            document.getElementById('loadingText').innerText = "Data load nahi ho saka.";
+            document.getElementById('loadingText').innerText = "Failed to load data.";
         }
     }
 
@@ -380,14 +373,14 @@
             
             expensesData.push({ name: name, item: item, amount: amount });
             calculateHisab();
-            alert("Kharcha save ho gaya!");
+            alert("Expense saved successfully!");
             fetchExpenses();
         } catch (error) {
             console.error("Error saving:", error);
-            alert("Error aya, check karein.");
+            alert("Something went wrong, please try again.");
         } finally {
             submitBtn.disabled = false;
-            submitBtn.innerText = "Save Karein";
+            submitBtn.innerText = "Save Expense";
         }
     });
 
