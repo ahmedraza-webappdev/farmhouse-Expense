@@ -314,7 +314,6 @@
         let totalExpense = 0;
         let individualTotalSpent = {};
         
-        // Initialize structures
         members.forEach(m => {
             individualTotalSpent[m] = 0;
         });
@@ -322,14 +321,13 @@
         const logsList = document.getElementById('logsList');
         logsList.innerHTML = '';
 
-        // Process logs and calculate total spent per person
         expensesData.forEach(item => {
             const amt = parseFloat(item.amount) || 0;
             totalExpense += amt;
-            if (individualTotalSpent[item.itemOwner || item.name] !== undefined) {
-                individualTotalSpent[item.itemOwner || item.name] += amt;
+            const buyer = item.itemOwner || item.name;
+            if (individualTotalSpent[buyer] !== undefined) {
+                individualTotalSpent[buyer] += amt;
             } else {
-                // fallback if property names vary slightly
                 individualTotalSpent[item.name] = (individualTotalSpent[item.name] || 0) + amt;
             }
             
@@ -346,50 +344,43 @@
         const statusListContainer = document.getElementById('memberStatusList');
         statusListContainer.innerHTML = '';
 
-        // Generate broken down matrix
         members.forEach(currentMember => {
             const memberBlock = document.createElement('div');
             memberBlock.className = 'member-block';
 
             let breakdownHTML = '<ul class="breakdown-list">';
-            let hasTransactions = false;
+            let suggestionsCount = 0;
 
-            // Check what this member needs to pay to OTHERS or receive from OTHERS for every single expense
             members.forEach(otherMember => {
                 if (currentMember === otherMember) return;
 
-                // How much did the other member spend total?
+                // 1. Check what the other member spent, and how much current member owes them strictly
                 const otherSpent = individualTotalSpent[otherMember] || 0;
-                // Current member's share for the other member's total spending
-                const shareToPayOther = otherSpent / 6;
-
-                // How much did the current member spend total?
-                const currentSpent = individualTotalSpent[currentMember] || 0;
-                // How much the other member owes the current member
-                const shareToReceiveFromOther = currentSpent / 6;
-
-                // Net matrix transaction between these two specific people
-                const netRelation = shareToReceiveFromOther - shareToPayOther;
-
-                if (netRelation > 0) {
-                    hasTransactions = true;
-                    breakdownHTML += `
-                        <li class="breakdown-item">
-                            <span>Receive from ${otherMember}:</span> 
-                            <span class="receive-text">Rs. ${Math.round(netRelation).toLocaleString()}</span>
-                        </li>`;
-                } else if (netRelation < 0) {
-                    hasTransactions = true;
+                if (otherSpent > 0) {
+                    suggestionsCount++;
+                    const strictOwe = otherSpent / 6;
                     breakdownHTML += `
                         <li class="breakdown-item">
                             <span>Give to ${otherMember}:</span> 
-                            <span class="give-text">Rs. ${Math.round(Math.abs(netRelation)).toLocaleString()}</span>
+                            <span class="give-text">Rs. ${Math.round(strictOwe).toLocaleString()}</span>
+                        </li>`;
+                }
+
+                // 2. Check what current member spent, and how much other member owes them strictly
+                const currentSpent = individualTotalSpent[currentMember] || 0;
+                if (currentSpent > 0) {
+                    suggestionsCount++;
+                    const strictReceive = currentSpent / 6;
+                    breakdownHTML += `
+                        <li class="breakdown-item">
+                            <span>Receive from ${otherMember}:</span> 
+                            <span class="receive-text">Rs. ${Math.round(strictReceive).toLocaleString()}</span>
                         </li>`;
                 }
             });
 
-            if (!hasTransactions) {
-                breakdownHTML += `<li class="breakdown-item settled-text">All settled with everyone</li>`;
+            if (suggestionsCount === 0) {
+                breakdownHTML += `<li class="breakdown-item settled-text">No transactions yet</li>`;
             }
             breakdownHTML += '</ul>';
 
