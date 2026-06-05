@@ -200,6 +200,14 @@
             justify-content: space-between;
             color: var(--text-muted);
         }
+
+        footer {
+            text-align: center;
+            padding: 15px 0 30px 0;
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 0.3px;
+        }
     </style>
 </head>
 <body>
@@ -254,24 +262,22 @@
 
     <div class="card">
         <h2>Net Settlement (Who owes whom)</h2>
-        <div id="memberStatusList">
-            </div>
+        <div id="memberStatusList"></div>
     </div>
 
     <div class="card">
         <h2>Expense Logs (Details)</h2>
-        <div class="logs-list" id="logsList">
-            </div>
+        <div class="logs-list" id="logsList"></div>
     </div>
+
+    <footer>
+        System developed by Ahmed
+    </footer>
 </div>
 
 <script>
-    // ⚠️ YAHA APNA GOOGLE WEB APP URL PASTE KAREIN
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwx613xaYOSEjfkSMEAaD51IHyl1nBsqd-hMUP5Wy6A-t0ze8syB-3jOFcR3yClvuGWag/exec";
-
-    // 6 Doston ke naam (Symmetry ke liye bilkul uppercase/lowercase same hain)
     const members = ["KHANSAHAB", "Alishal", "Ahmed", "Minnu", "Zayan", "Ayaan"];
-    
     let expensesData = [];
 
     async function fetchExpenses() {
