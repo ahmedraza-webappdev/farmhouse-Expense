@@ -141,43 +141,55 @@
             font-size: 15px;
         }
 
-        .member-status {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
+        .member-block {
+            padding: 15px 0;
             border-bottom: 1px solid var(--border);
-            font-size: 14px;
         }
 
-        .member-status:last-child {
+        .member-block:last-child {
             border-bottom: none;
         }
 
+        .member-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
         .name-tag {
-            font-weight: 500;
-        }
-
-        .status-amount {
             font-weight: 600;
-        }
-
-        .status-receive {
-            color: var(--success);
-        }
-
-        .status-give {
-            color: var(--danger);
-        }
-
-        .status-settled {
-            color: var(--text-muted);
+            font-size: 15px;
         }
 
         .sub-text {
-            font-size: 11px;
+            font-size: 12px;
             color: var(--text-muted);
-            display: block;
+        }
+
+        .breakdown-list {
+            list-style: none;
+            padding-left: 5px;
+        }
+
+        .breakdown-item {
+            font-size: 13px;
+            margin-top: 4px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .give-text {
+            color: var(--danger);
+        }
+
+        .receive-text {
+            color: var(--success);
+        }
+
+        .settled-text {
+            color: var(--text-muted);
+            font-style: italic;
         }
 
         .loading {
@@ -251,17 +263,17 @@
         <div id="summaryContent" style="display: none;">
             <div class="summary-row">
                 <span>Total Expense:</span>
-                <span id="totalExpense" class="status-amount">Rs. 0</span>
+                <span id="totalExpense" style="font-weight:600;">Rs. 0</span>
             </div>
             <div class="summary-row summary-total">
-                <span>Per Head Share (6 People):</span>
-                <span id="perHeadExpense" class="status-amount">Rs. 0</span>
+                <span>Per Head Total Share:</span>
+                <span id="perHeadExpense" style="font-weight:600;">Rs. 0</span>
             </div>
         </div>
     </div>
 
     <div class="card">
-        <h2>Net Settlement (Who owes whom)</h2>
+        <h2>Detailed Hisab (Who pays whom)</h2>
         <div id="memberStatusList"></div>
     </div>
 
@@ -299,56 +311,96 @@
         document.getElementById('loadingText').style.display = 'none';
         document.getElementById('summaryContent').style.display = 'block';
 
-        let total = 0;
-        let individualExpenses = {};
+        let totalExpense = 0;
+        let individualTotalSpent = {};
         
-        members.forEach(m => individualExpenses[m] = 0);
+        // Initialize structures
+        members.forEach(m => {
+            individualTotalSpent[m] = 0;
+        });
+
         const logsList = document.getElementById('logsList');
         logsList.innerHTML = '';
 
+        // Process logs and calculate total spent per person
         expensesData.forEach(item => {
             const amt = parseFloat(item.amount) || 0;
-            total += amt;
-            if (individualExpenses[item.name] !== undefined) {
-                individualExpenses[item.name] += amt;
+            totalExpense += amt;
+            if (individualTotalSpent[item.itemOwner || item.name] !== undefined) {
+                individualTotalSpent[item.itemOwner || item.name] += amt;
+            } else {
+                // fallback if property names vary slightly
+                individualTotalSpent[item.name] = (individualTotalSpent[item.name] || 0) + amt;
             }
+            
             const logItem = document.createElement('div');
             logItem.className = 'log-item';
             logItem.innerHTML = `<span><strong>${item.name}</strong> (${item.item})</span> <span>Rs. ${amt}</span>`;
             logsList.appendChild(logItem);
         });
 
-        const perHead = total / 6;
-        document.getElementById('totalExpense').innerText = `Rs. ${total.toLocaleString()}`;
-        document.getElementById('perHeadExpense').innerText = `Rs. ${Math.round(perHead).toLocaleString()}`;
+        const totalPerHead = totalExpense / 6;
+        document.getElementById('totalExpense').innerText = `Rs. ${totalExpense.toLocaleString()}`;
+        document.getElementById('perHeadExpense').innerText = `Rs. ${Math.round(totalPerHead).toLocaleString()}`;
 
         const statusListContainer = document.getElementById('memberStatusList');
         statusListContainer.innerHTML = '';
 
-        members.forEach(name => {
-            const spent = individualExpenses[name];
-            const net = spent - perHead; 
-            
-            const div = document.createElement('div');
-            div.className = 'member-status';
+        // Generate broken down matrix
+        members.forEach(currentMember => {
+            const memberBlock = document.createElement('div');
+            memberBlock.className = 'member-block';
 
-            let statusHTML = '';
-            if (net > 0) {
-                statusHTML = `<span class="status-amount status-receive">Receive Rs. ${Math.round(net).toLocaleString()}</span>`;
-            } else if (net < 0) {
-                statusHTML = `<span class="status-amount status-give">Give Rs. ${Math.round(Math.abs(net)).toLocaleString()}</span>`;
-            } else {
-                statusHTML = `<span class="status-amount status-settled">Settled (Rs. 0)</span>`;
+            let breakdownHTML = '<ul class="breakdown-list">';
+            let hasTransactions = false;
+
+            // Check what this member needs to pay to OTHERS or receive from OTHERS for every single expense
+            members.forEach(otherMember => {
+                if (currentMember === otherMember) return;
+
+                // How much did the other member spend total?
+                const otherSpent = individualTotalSpent[otherMember] || 0;
+                // Current member's share for the other member's total spending
+                const shareToPayOther = otherSpent / 6;
+
+                // How much did the current member spend total?
+                const currentSpent = individualTotalSpent[currentMember] || 0;
+                // How much the other member owes the current member
+                const shareToReceiveFromOther = currentSpent / 6;
+
+                // Net matrix transaction between these two specific people
+                const netRelation = shareToReceiveFromOther - shareToPayOther;
+
+                if (netRelation > 0) {
+                    hasTransactions = true;
+                    breakdownHTML += `
+                        <li class="breakdown-item">
+                            <span>Receive from ${otherMember}:</span> 
+                            <span class="receive-text">Rs. ${Math.round(netRelation).toLocaleString()}</span>
+                        </li>`;
+                } else if (netRelation < 0) {
+                    hasTransactions = true;
+                    breakdownHTML += `
+                        <li class="breakdown-item">
+                            <span>Give to ${otherMember}:</span> 
+                            <span class="give-text">Rs. ${Math.round(Math.abs(netRelation)).toLocaleString()}</span>
+                        </li>`;
+                }
+            });
+
+            if (!hasTransactions) {
+                breakdownHTML += `<li class="breakdown-item settled-text">All settled with everyone</li>`;
             }
+            breakdownHTML += '</ul>';
 
-            div.innerHTML = `
-                <div>
-                    <span class="name-tag">${name}</span>
-                    <span class="sub-text">Total kharcha: Rs. ${spent.toLocaleString()}</span>
+            memberBlock.innerHTML = `
+                <div class="member-header">
+                    <span class="name-tag">${currentMember}</span>
+                    <span class="sub-text">Total Spent: Rs. ${(individualTotalSpent[currentMember] || 0).toLocaleString()}</span>
                 </div>
-                ${statusHTML}
+                ${breakdownHTML}
             `;
-            statusListContainer.appendChild(div);
+            statusListContainer.appendChild(memberBlock);
         });
     }
 
