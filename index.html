@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farm House Expense Tracker</title>
+    <style>
+        :root {
+            --bg-color: #fdfbf7;
+            --card-bg: #ffffff;
+            --text-main: #2d3748;
+            --text-muted: #718096;
+            --accent: #4a5568;
+            --border: #e2e8f0;
+            --success: #2f855a;
+            --danger: #9b2c2c;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 20px 15px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        header h1 {
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
+        }
+
+        header p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+
+        .card h2 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--text-main);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: var(--text-muted);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            color: var(--text-main);
+            background-color: #fafafa;
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--accent);
+            background-color: #fff;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        button:disabled {
+            background-color: var(--border);
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px dashed var(--border);
+            font-size: 14px;
+        }
+
+        .summary-row:last-child {
+            border-bottom: none;
+        }
+
+        .summary-total {
+            font-weight: 600;
+            margin-top: 5px;
+            font-size: 15px;
+        }
+
+        .member-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+
+        .member-status:last-child {
+            border-bottom: none;
+        }
+
+        .name-tag {
+            font-weight: 500;
+        }
+
+        .status-amount {
+            font-weight: 600;
+        }
+
+        .status-receive {
+            color: var(--success);
+        }
+
+        .status-give {
+            color: var(--danger);
+        }
+
+        .status-settled {
+            color: var(--text-muted);
+        }
+
+        .sub-text {
+            font-size: 11px;
+            color: var(--text-muted);
+            display: block;
+        }
+
+        .loading {
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-muted);
+            padding: 10px;
+        }
+
+        .logs-list {
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .log-item {
+            font-size: 12px;
+            padding: 6px 0;
+            border-bottom: 1px solid #f7f7f7;
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Farm House Trip</h1>
+        <p>6 Persons Expense Sharing System</p>
+    </header>
+
+    <!-- Expense Input Form -->
+    <div class="card">
+        <h2>Naya Kharcha Add Karein</h2>
+        <form id="expenseForm">
+            <div class="form-group">
+                <label for="memberName">Naam Select Karein</label>
+                <select id="memberName" required>
+                    <option value="" disabled selected>Kaun hai?</option>
+                    <!-- Yahan aap doston ke actual naam change kar sakte hain -->
+                    <option value="Dost 1">Dost 1</option>
+                    <option value="Dost 2">Dost 2</option>
+                    <option value="Dost 3">Dost 3</option>
+                    <option value="Dost 4">Dost 4</option>
+                    <option value="Dost 5">Dost 5</option>
+                    <option value="Dost 6">Dost 6</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="itemDescription">Saman / Wajah</label>
+                <input type="text" id="itemDescription" placeholder="e.g., Petrol, Gosht, Cold drinks" required>
+            </div>
+            <div class="form-group">
+                <label for="amountPaid">Paise (PKR)</label>
+                <input type="number" id="amountPaid" min="1" placeholder="Kitne paise kharch kiye?" required>
+            </div>
+            <button type="submit" id="submitBtn">Save Karein</button>
+        </form>
+    </div>
+
+    <!-- Calculations Summary -->
+    <div class="card">
+        <h2>Trip Ka Hisab-Kitab</h2>
+        <div id="loadingText" class="loading">Data load ho raha hai...</div>
+        <div id="summaryContent" style="display: none;">
+            <div class="summary-row">
+                <span>Total Kharcha:</span>
+                <span id="totalExpense" class="status-amount">Rs. 0</span>
+            </div>
+            <div class="summary-row summary-total">
+                <span>Per Head Hissa (6 Log):</span>
+                <span id="perHeadExpense" class="status-amount">Rs. 0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settlement Status -->
+    <div class="card">
+        <h2>Net Settlement (Kisko Kitne Dene/Lene Hain)</h2>
+        <div id="memberStatusList">
+            <!-- Dynamic data will load here -->
+        </div>
+    </div>
+
+    <!-- Recent Activity Log -->
+    <div class="card">
+        <h2>Saman ki Details (Logs)</h2>
+        <div class="logs-list" id="logsList">
+            <!-- Items logs -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // ⚠️ YAHA APNA GOOGLE WEB APP URL PASTE KAREIN
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwx613xaYOSEjfkSMEAaD51IHyl1nBsqd-hMUP5Wy6A-t0ze8syB-3jOFcR3yClvuGWag/exec";
+
+    // 6 Doston ke naam (Aap yahan change kar sakte hain)
+    const members = ["KHANSAHAB", "Alishal", "Ahmed", "Minnu", "Zayan", "Ayaan"];
+    
+    let expensesData = [];
+
+    async function fetchExpenses() {
+        if(SCRIPT_URL === "YOUR_GOOGLE_SCRIPT_WEB_APP_URL_HERE") {
+            document.getElementById('loadingText').innerText = "Please update SCRIPT_URL in code.";
+            return;
+        }
+        try {
+            const response = await fetch(SCRIPT_URL);
+            expensesData = await response.json();
+            calculateHisab();
+        } catch (error) {
+            console.error("Error fetching data:", error);
+            document.getElementById('loadingText').innerText = "Data load nahi ho saka.";
+        }
+    }
+
+    function calculateHisab() {
+        document.getElementById('loadingText').style.display = 'none';
+        document.getElementById('summaryContent').style.display = 'block';
+
+        let total = 0;
+        let individualExpenses = {};
+        
+        members.forEach(m => individualExpenses[m] = 0);
+        const logsList = document.getElementById('logsList');
+        logsList.innerHTML = '';
+
+        expensesData.forEach(item => {
+            const amt = parseFloat(item.amount) || 0;
+            total += amt;
+            if (individualExpenses[item.name] !== undefined) {
+                individualExpenses[item.name] += amt;
+            }
+            const logItem = document.createElement('div');
+            logItem.className = 'log-item';
+            logItem.innerHTML = `<span><strong>${item.name}</strong> (${item.item})</span> <span>Rs. ${amt}</span>`;
+            logsList.appendChild(logItem);
+        });
+
+        const perHead = total / 6;
+        document.getElementById('totalExpense').innerText = `Rs. ${total.toLocaleString()}`;
+        document.getElementById('perHeadExpense').innerText = `Rs. ${Math.round(perHead).toLocaleString()}`;
+
+        const statusListContainer = document.getElementById('memberStatusList');
+        statusListContainer.innerHTML = '';
+
+        members.forEach(name => {
+            const spent = individualExpenses[name];
+            const net = spent - perHead; 
+            
+            const div = document.createElement('div');
+            div.className = 'member-status';
+
+            let statusHTML = '';
+            if (net > 0) {
+                statusHTML = `<span class="status-amount status-receive">Receive Rs. ${Math.round(net).toLocaleString()}</span>`;
+            } else if (net < 0) {
+                statusHTML = `<span class="status-amount status-give">Give Rs. ${Math.round(Math.abs(net)).toLocaleString()}</span>`;
+            } else {
+                statusHTML = `<span class="status-amount status-settled">Settled (Rs. 0)</span>`;
+            }
+
+            div.innerHTML = `
+                <div>
+                    <span class="name-tag">${name}</span>
+                    <span class="sub-text">Total kharcha: Rs. ${spent.toLocaleString()}</span>
+                </div>
+                ${statusHTML}
+            `;
+            statusListContainer.appendChild(div);
+        });
+    }
+
+    document.getElementById('expenseForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitBtn = document.getElementById('submitBtn');
+        const name = document.getElementById('memberName').value;
+        const item = document.getElementById('itemDescription').value;
+        const amount = document.getElementById('amountPaid').value;
+
+        if (!name || !item || !amount) return;
+
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Saving...";
+
+        const payload = { action: "addExpense", name: name, item: item, amount: amount };
+
+        try {
+            await fetch(SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            document.getElementById('itemDescription').value = '';
+            document.getElementById('amountPaid').value = '';
+            
+            expensesData.push({ name: name, item: item, amount: amount });
+            calculateHisab();
+            alert("Kharcha save ho gaya!");
+            fetchExpenses();
+        } catch (error) {
+            console.error("Error saving:", error);
+            alert("Error aya, check karein.");
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerText = "Save Karein";
+        }
+    });
+
+    window.onload = fetchExpenses;
+</script>
+</body>
+</html>
